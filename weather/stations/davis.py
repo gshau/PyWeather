@@ -45,6 +45,13 @@ def log_raw(msg, raw):
     log.debug(msg + ': ' + raw.encode('hex'))
 
 
+def fix_negative_reading(x):
+    if x > 2**15:
+        return x - 2**16
+    else:
+        return x
+
+
 class NoDeviceException(Exception): pass
 
 
@@ -145,8 +152,8 @@ class LoopStruct(Struct):
 
     def _post_unpack(self, items):
         items['Pressure'] = items['Pressure'] / 1000.0
-        items['TempIn'] = items['TempIn'] / 10.0
-        items['TempOut'] = items['TempOut'] / 10.0
+        items['TempIn'] = fix_negative_reading(items['TempIn']) / 10.0
+        items['TempOut'] =fix_negative_reading(items['TempOut']) / 10.0
         items['RainRate'] = items['RainRate'] / 100.0
         items['RainStorm'] = items['RainStorm'] / 100.0
         items['StormStartDate'] = self._unpack_storm_date(
